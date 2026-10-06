@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -10,7 +10,8 @@
 <meta name="theme-color" content="#f5f7fb">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
 </head>
-<body><title>Tornister 7b</title>
+<body>
+<title>Tornister 7b</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Gabarito:wght@500;700;800&display=swap">
@@ -213,13 +214,17 @@ details.edit form{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:12px;z-index:30;font-weight:700;font-size:.9rem;max-width:calc(100% - 32px)}
 @media (min-width:800px){.toast{bottom:28px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.tab.lang{flex:0 0 auto;width:60px}
+.tab.lang b{font-family:var(--display);font-size:.95rem;line-height:24px;border:1.8px solid currentColor;border-radius:7px;padding:0 5px}
+@media (min-width:800px){.tab.lang{width:auto}.tab.lang b{line-height:20px;font-size:.8rem}}
 </style>
 
 <nav class="tabs" id="tabs">
-  <button class="tab" data-act="view" data-v="pack"><svg viewBox="0 0 24 24"><path d="M6 8h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M8 14h8"/></svg>Pack</button>
-  <button class="tab" data-act="view" data-v="week"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Timetable</button>
-  <button class="tab" data-act="view" data-v="tasks"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11"/><circle cx="5" cy="18" r="1.2"/></svg>Tasks</button>
-  <button class="tab" data-act="view" data-v="setup"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Setup</button>
+  <button class="tab" data-act="view" data-v="pack"><svg viewBox="0 0 24 24"><path d="M6 8h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M8 14h8"/></svg><span data-t="tabPack"></span></button>
+  <button class="tab" data-act="view" data-v="week"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-t="tabWeek"></span></button>
+  <button class="tab" data-act="view" data-v="tasks"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11"/><circle cx="5" cy="18" r="1.2"/></svg><span data-t="tabTasks"></span></button>
+  <button class="tab" data-act="view" data-v="setup"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-t="tabSetup"></span></button>
+  <button class="tab lang" data-act="lang" id="langBtn"><b></b><span data-t="langName"></span></button>
 </nav>
 <div class="wrap"><main id="view"></main></div>
 <div class="scrim" id="scrim" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
@@ -230,7 +235,97 @@ details.edit form{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 const KEY = "tornister.v1";
 const SUPPORT = "Grycz Milena";
 const TIMES = {1:["08:00","08:45"],2:["08:55","09:40"],3:["09:50","10:35"],4:["10:45","11:30"],5:["11:40","12:25"],6:["12:45","13:30"],7:["13:40","14:25"],8:["14:35","15:20"],9:["15:30","16:15"],10:["16:25","17:10"]};
-const KINDS = {hw:"Homework", test:"Test", bring:"Bring", note:"Note"};
+const KINDS = ["hw","test","bring","note"];
+
+/* ---------- language ---------- */
+const LANG_KEY = "tornister.lang";
+const PL_ACC = ["niedzielę","poniedziałek","wtorek","środę","czwartek","piątek","sobotę"];
+const plLessons = n => n === 1 ? "lekcja" : (n%10 >= 2 && n%10 <= 4 && (n%100 < 12 || n%100 > 14)) ? "lekcje" : "lekcji";
+const L = {
+  en: {
+    locale:"en-GB", langName:"Polski", langCode:"PL",
+    tabPack:"Pack", tabWeek:"Timetable", tabTasks:"Tasks", tabSetup:"Setup",
+    kind_hw:"Homework", kind_test:"Test", kind_bring:"Bring", kind_note:"Note",
+    packingFor:"Packing for", prevDay:"Previous school day", nextDay:"Next school day",
+    dayLine:(n,a,b,d) => `${n} lessons · ${a}–${b} · your bag still has ${fmtDay(d)}'s things`,
+    doneOf:(d,t) => `<b>${d}</b> of ${t} done`, ready:"Bag is ready", tickHint:"Tick things off as you go",
+    tagDue:"Due", dueTitle:"Homework & tests",
+    tagOut:"Take out", outTitle:"Not needed", outEmpty:"Nothing to take out.",
+    tagPack:"Pack", packTitle:"Put in", packEmpty:"Nothing new to pack.",
+    tagKeep:"Keep", keepTitle:"Already in your bag", keepEmpty:d => `Nothing carries over from ${fmtDay(d)}.`,
+    taskSuffix:"task", markDone:"Mark done", delTask:"Delete task", lesson:n => `lesson ${n}`, overdue:"overdue",
+    noLessons:"No lessons in the timetable", noLessonsHint:"Add lessons in the Timetable tab, or reset in Setup.",
+    prevWeek:"Previous week", nextWeek:"Next week", thisWeek:"This week",
+    tapHint:"Tap a lesson to add homework, a test or something to bring.",
+    free:"Free period", addLesson:"Add a lesson", now:"Now", next:"Next",
+    tasks:"Tasks", newTask:"+ New task", today:"Today", tomorrow:"Tomorrow", overdueGroup:"Overdue",
+    noTasks:"No open tasks", noTasksHint:"Add one from the Timetable by tapping a lesson, or with “New task”. Tasks marked “Bring” show up in your Pack list for that day.",
+    doneCount:n => `Done (${n})`, clearDone:"Delete done tasks",
+    langTitle:"Language", langHint:"Język: przełącz na polski przyciskiem poniżej albo w menu.",
+    itemsTitle:"What each subject needs", itemsHint:"These items decide what goes in and out of your bag. Remove the ones you leave at school, add things like a calculator or a recorder.",
+    addItem:"+ add item", remove:"Remove", newSubjPh:"New subject name", addSubj:"Add subject",
+    moveTitle:"Move to another device", moveHint:"Your data is saved in this browser only. To get it on your phone or PC, copy the backup here and paste it into the box on the other device.",
+    copyBackup:"Copy backup", pastePh:"Paste a backup here…", loadBackup:"Load pasted backup",
+    resetTitle:"Start over", resetHint:"Puts back the original 7b timetable and deletes all tasks and edits.", resetBtn:"Reset everything", resetAgain:"Tap again to reset",
+    subject:"Subject", room:"Room", group:"Group", teacher:"Teacher", support:"Wspomaganie",
+    saveWeekly:"Save every week", addWeekly:"Add to every week", removeLesson:"Remove lesson",
+    close:"Close", roomShort:"room", bringTo:"Bring to this lesson", nothingBring:"Nothing. Change this in Setup.",
+    lessonTasks:"Tasks for this lesson", noTasksYet:"No tasks yet.", taskPh:"e.g. ex. 4–6, page 52", add:"Add",
+    editLesson:"Change this lesson in the timetable", addLessonN:n => `Add lesson ${n}`, everyDay:d => `Every ${d}`,
+    newTaskTitle:"New task", newTaskHint:"The date jumps to the next lesson of the subject you pick.",
+    what:"What", whatPh:"e.g. Test on chapter 2", forDate:"For", addTask:"Add task", taskType:"Task type",
+    tDeleted:"Task deleted", tLessonRemoved:"Lesson removed", tCopied:"Backup copied", tCopyFallback:"Backup is in the box. Copy it from there.",
+    tLoaded:"Backup loaded", tBadBackup:"That doesn't look like a Tornister backup. Paste the whole text.",
+    tReset:"Back to the original timetable", tNeedText:"Write what the task is first", tNeedDate:"Pick a date",
+    tBringAdded:"Added. It's on your Pack list for that day", tTaskAdded:"Task added", tTTUpdated:"Timetable updated",
+    tSubjAdded:n => `${n} added. Put it in the timetable from a free period.`, tLang:"Switched to English"
+  },
+  pl: {
+    locale:"pl-PL", langName:"English", langCode:"EN",
+    tabPack:"Plecak", tabWeek:"Plan lekcji", tabTasks:"Zadania", tabSetup:"Ustawienia",
+    kind_hw:"Praca domowa", kind_test:"Sprawdzian", kind_bring:"Przynieś", kind_note:"Notatka",
+    packingFor:"Pakujesz się na", prevDay:"Poprzedni dzień szkolny", nextDay:"Następny dzień szkolny",
+    dayLine:(n,a,b,d) => `${n} ${plLessons(n)} · ${a}–${b} · w plecaku masz rzeczy na ${PL_ACC[d.getDay()]}`,
+    doneOf:(d,t) => `<b>${d}</b> z ${t} gotowe`, ready:"Plecak gotowy", tickHint:"Odhaczaj na bieżąco",
+    tagDue:"Termin", dueTitle:"Prace domowe i sprawdziany",
+    tagOut:"Wyjmij", outTitle:"Niepotrzebne", outEmpty:"Nic do wyjęcia.",
+    tagPack:"Spakuj", packTitle:"Włóż", packEmpty:"Nic nowego do spakowania.",
+    tagKeep:"Zostaw", keepTitle:"Już w plecaku", keepEmpty:d => `Nic nie zostaje z planu na ${PL_ACC[d.getDay()]}.`,
+    taskSuffix:"zadanie", markDone:"Oznacz jako zrobione", delTask:"Usuń zadanie", lesson:n => `lekcja ${n}`, overdue:"zaległe",
+    noLessons:"Brak lekcji w planie", noLessonsHint:"Dodaj lekcje w zakładce Plan lekcji albo zresetuj w Ustawieniach.",
+    prevWeek:"Poprzedni tydzień", nextWeek:"Następny tydzień", thisWeek:"Ten tydzień",
+    tapHint:"Kliknij lekcję, żeby dodać pracę domową, sprawdzian albo coś do przyniesienia.",
+    free:"Okienko", addLesson:"Dodaj lekcję", now:"Teraz", next:"Następna",
+    tasks:"Zadania", newTask:"+ Nowe zadanie", today:"Dziś", tomorrow:"Jutro", overdueGroup:"Zaległe",
+    noTasks:"Brak zadań", noTasksHint:"Dodaj zadanie, klikając lekcję w planie, albo przyciskiem „Nowe zadanie”. Zadania typu „Przynieś” pojawią się na liście do spakowania na ten dzień.",
+    doneCount:n => `Zrobione (${n})`, clearDone:"Usuń zrobione",
+    langTitle:"Język", langHint:"Language: switch to English with the button below or in the menu.",
+    itemsTitle:"Co trzeba na każdy przedmiot", itemsHint:"Na tej podstawie aplikacja wie, co włożyć do plecaka, a co wyjąć. Usuń rzeczy, które zostawiasz w szkole, dodaj np. kalkulator albo flet.",
+    addItem:"+ dodaj rzecz", remove:"Usuń", newSubjPh:"Nazwa nowego przedmiotu", addSubj:"Dodaj przedmiot",
+    moveTitle:"Przenieś na inne urządzenie", moveHint:"Dane zapisują się tylko w tej przeglądarce. Żeby mieć je na telefonie albo komputerze, skopiuj tu kopię zapasową i wklej ją w pole na drugim urządzeniu.",
+    copyBackup:"Kopiuj kopię zapasową", pastePh:"Wklej tu kopię zapasową…", loadBackup:"Wczytaj wklejoną kopię",
+    resetTitle:"Zacznij od nowa", resetHint:"Przywraca oryginalny plan 7b i usuwa wszystkie zadania i zmiany.", resetBtn:"Resetuj wszystko", resetAgain:"Kliknij jeszcze raz",
+    subject:"Przedmiot", room:"Sala", group:"Grupa", teacher:"Nauczyciel", support:"Wspomaganie",
+    saveWeekly:"Zapisz na każdy tydzień", addWeekly:"Dodaj na każdy tydzień", removeLesson:"Usuń lekcję",
+    close:"Zamknij", roomShort:"sala", bringTo:"Na tę lekcję weź", nothingBring:"Nic. Zmienisz to w Ustawieniach.",
+    lessonTasks:"Zadania na tę lekcję", noTasksYet:"Na razie brak zadań.", taskPh:"np. zad. 4–6, str. 52", add:"Dodaj",
+    editLesson:"Zmień tę lekcję w planie", addLessonN:n => `Dodaj lekcję ${n}`, everyDay:d => `${cap(d)}, co tydzień`,
+    newTaskTitle:"Nowe zadanie", newTaskHint:"Data ustawi się na najbliższą lekcję wybranego przedmiotu.",
+    what:"Co", whatPh:"np. Sprawdzian z działu 2", forDate:"Na kiedy", addTask:"Dodaj zadanie", taskType:"Rodzaj zadania",
+    tDeleted:"Usunięto zadanie", tLessonRemoved:"Usunięto lekcję", tCopied:"Skopiowano kopię zapasową", tCopyFallback:"Kopia jest w polu poniżej. Skopiuj ją stamtąd.",
+    tLoaded:"Wczytano kopię", tBadBackup:"To nie wygląda na kopię Tornistra. Wklej cały tekst.",
+    tReset:"Przywrócono oryginalny plan", tNeedText:"Najpierw wpisz, co to za zadanie", tNeedDate:"Wybierz datę",
+    tBringAdded:"Dodano. Jest na liście do spakowania na ten dzień", tTaskAdded:"Dodano zadanie", tTTUpdated:"Zaktualizowano plan",
+    tSubjAdded:n => `Dodano: ${n}. Wstaw go do planu, klikając okienko.`, tLang:"Przełączono na polski"
+  }
+};
+let lang;
+try { lang = localStorage.getItem(LANG_KEY); } catch(e) {}
+if (!L[lang]) lang = /^pl/i.test(navigator.language || "") ? "pl" : "en";
+const t = (k, ...a) => { const v = L[lang][k] ?? L.en[k]; return typeof v === "function" ? v(...a) : v; };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmtDay = d => cap(fmt(d,{weekday:"long"}));
+const kindName = k => t("kind_" + k);
 
 const DEF_SUBJECTS = {
   pol:{name:"Język polski", short:"Polski", hue:350, items:["Podręcznik","Zeszyt"]},
@@ -280,7 +375,7 @@ const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
 const toMin = s => { const [a,b] = s.split(":").map(Number); return a*60+b; };
 const nowMin = () => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); };
-const fmt = (d,o) => d.toLocaleDateString("en-GB", o);
+const fmt = (d,o) => d.toLocaleDateString(t("locale"), o);
 const subj = id => S.subjects[id] || {name:id, hue:0, items:[]};
 const short = id => subj(id).short || subj(id).name;
 const dot = id => `<i class="dot" style="--h:${subj(id).hue}"></i>`;
@@ -325,20 +420,20 @@ function bagOf(d) {
   return m;
 }
 
-function taskRow(t, showDate) {
-  const d = parseIso(t.date), late = !t.done && d < today();
-  return `<div class="task ${t.done?"done":""}">
-    <label class="tcheck"><input type="checkbox" data-act="done" data-id="${t.id}" ${t.done?"checked":""} aria-label="Mark done"><span class="box"></span></label>
-    <div class="tbody"><span class="kind k-${t.kind}">${KINDS[t.kind]}</span> <span class="ttext">${esc(t.text)}</span>
-      <div class="meta">${dot(t.s)}${esc(short(t.s))}${t.lesson?` · lesson ${t.lesson}`:""}${showDate?` · <span class="${late?"overdue":""}">${late?"overdue, ":""}${fmt(d,{weekday:"short",day:"numeric",month:"short"})}</span>`:""}</div></div>
-    <button class="icon-btn" data-act="deltask" data-id="${t.id}" aria-label="Delete task">×</button>
+function taskRow(tk, showDate) {
+  const d = parseIso(tk.date), late = !tk.done && d < today();
+  return `<div class="task ${tk.done?"done":""}">
+    <label class="tcheck"><input type="checkbox" data-act="done" data-id="${tk.id}" ${tk.done?"checked":""} aria-label="${t("markDone")}"><span class="box"></span></label>
+    <div class="tbody"><span class="kind k-${tk.kind}">${kindName(tk.kind)}</span> <span class="ttext">${esc(tk.text)}</span>
+      <div class="meta">${dot(tk.s)}${esc(short(tk.s))}${tk.lesson?` · ${t("lesson",tk.lesson)}`:""}${showDate?` · <span class="${late?"overdue":""}">${late?t("overdue")+", ":""}${fmt(d,{weekday:"short",day:"numeric",month:"short"})}</span>`:""}</div></div>
+    <button class="icon-btn" data-act="deltask" data-id="${tk.id}" aria-label="${t("delTask")}">×</button>
   </div>`;
 }
 
 /* ---------- views ---------- */
 function renderPack() {
-  const t = ui.target, f = stepSchool(t,-1), key = iso(t);
-  const T = bagOf(t), F = bagOf(f), ck = S.checks[key] || {};
+  const tg = ui.target, f = stepSchool(tg,-1), key = iso(tg);
+  const T = bagOf(tg), F = bagOf(f), ck = S.checks[key] || {};
   const pack = [], keep = [], out = [];
   T.forEach((v,k) => (F.has(k) ? keep : pack).push([k,v]));
   F.forEach((v,k) => { if (!T.has(k)) out.push([k,v]); });
@@ -346,37 +441,36 @@ function renderPack() {
   pack.sort(byLesson); keep.sort(byLesson); out.sort(byLesson);
   const total = pack.length + out.length;
   const done = pack.filter(([k]) => ck[k]).length + out.filter(([k]) => ck["out:"+k]).length;
-  const ls = lessonsOn(t);
+  const ls = lessonsOn(tg);
   const due = S.tasks.filter(x => x.date === key && x.kind !== "bring").sort((a,b) => (a.lesson||0)-(b.lesson||0));
-  const fName = fmt(f,{weekday:"long"});
-  const rowsCheck = (arr, pre) => arr.map(([k,v]) => `<label class="item"><input type="checkbox" data-act="check" data-k="${esc(pre+k)}" ${ck[pre+k]?"checked":""}><span class="box"></span><span class="iname">${esc(v.item)}</span><span class="isub">${dot(v.s)}${esc(short(v.s))}${v.task?" · task":""}</span></label>`).join("");
-  if (!ls.length) return `<div class="card"><h2>No lessons in the timetable</h2><p class="meta">Add lessons in the Timetable tab, or reset in Setup.</p></div>`;
+  const rowsCheck = (arr, pre) => arr.map(([k,v]) => `<label class="item"><input type="checkbox" data-act="check" data-k="${esc(pre+k)}" ${ck[pre+k]?"checked":""}><span class="box"></span><span class="iname">${esc(v.item)}</span><span class="isub">${dot(v.s)}${esc(short(v.s))}${v.task?" · "+t("taskSuffix"):""}</span></label>`).join("");
+  if (!ls.length) return `<div class="card"><h2>${t("noLessons")}</h2><p class="meta">${t("noLessonsHint")}</p></div>`;
   const first = ls[0], last = ls[ls.length-1];
 
   return `
   <header class="hero">
-    <div class="eyebrow">Packing for</div>
+    <div class="eyebrow">${t("packingFor")}</div>
     <div class="dayrow">
-      <button class="arrow" data-act="tmove" data-d="-1" aria-label="Previous school day">‹</button>
-      <h1>${fmt(t,{weekday:"long"})} <span>${fmt(t,{day:"numeric",month:"short"})}</span></h1>
-      <button class="arrow" data-act="tmove" data-d="1" aria-label="Next school day">›</button>
+      <button class="arrow" data-act="tmove" data-d="-1" aria-label="${t("prevDay")}">‹</button>
+      <h1>${fmtDay(tg)} <span>${fmt(tg,{day:"numeric",month:"short"})}</span></h1>
+      <button class="arrow" data-act="tmove" data-d="1" aria-label="${t("nextDay")}">›</button>
     </div>
-    <p class="meta">${ls.length} lessons · ${TIMES[first.n][0]}–${TIMES[last.n][1]} · your bag still has ${esc(fName)}'s things</p>
+    <p class="meta">${esc(t("dayLine", ls.length, TIMES[first.n][0], TIMES[last.n][1], f))}</p>
     <div class="plan">${ls.map(l => `<span><b>${l.n}</b>${esc(short(l.s))}</span>`).join("")}</div>
     <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div style="width:${total?done/total*100:100}%"></div></div>
-    <div class="ptext"><span><b>${done}</b> of ${total} done</span><span>${done===total?"Bag is ready":"Tick things off as you go"}</span></div>
+    <div class="ptext"><span>${t("doneOf", done, total)}</span><span>${done===total?t("ready"):t("tickHint")}</span></div>
   </header>
 
-  ${due.length ? `<section class="list"><div class="lhead"><span class="tag due">Due</span><h2>Homework &amp; tests</h2></div>
+  ${due.length ? `<section class="list"><div class="lhead"><span class="tag due">${t("tagDue")}</span><h2>${esc(t("dueTitle"))}</h2></div>
     <div class="box-list">${due.map(x => taskRow(x,false)).join("")}</div></section>` : ""}
 
   <div class="cols">
-    <section class="list"><div class="lhead"><span class="tag out">Take out</span><h2>Not needed</h2><span class="meta">${out.length}</span></div>
-      <div class="box-list out-list">${rowsCheck(out,"out:") || `<div class="empty">Nothing to take out.</div>`}</div></section>
-    <section class="list"><div class="lhead"><span class="tag pack">Pack</span><h2>Put in</h2><span class="meta">${pack.length}</span></div>
-      <div class="box-list">${rowsCheck(pack,"") || `<div class="empty">Nothing new to pack.</div>`}</div></section>
-    <section class="list span"><div class="lhead"><span class="tag keep">Keep</span><h2>Already in your bag</h2><span class="meta">${keep.length}</span></div>
-      <div class="box-list">${keep.map(([k,v]) => `<div class="item static"><span class="iname">${esc(v.item)}</span><span class="isub">${dot(v.s)}${esc(short(v.s))}</span></div>`).join("") || `<div class="empty">Nothing carries over from ${esc(fName)}.</div>`}</div></section>
+    <section class="list"><div class="lhead"><span class="tag out">${t("tagOut")}</span><h2>${t("outTitle")}</h2><span class="meta">${out.length}</span></div>
+      <div class="box-list out-list">${rowsCheck(out,"out:") || `<div class="empty">${t("outEmpty")}</div>`}</div></section>
+    <section class="list"><div class="lhead"><span class="tag pack">${t("tagPack")}</span><h2>${t("packTitle")}</h2><span class="meta">${pack.length}</span></div>
+      <div class="box-list">${rowsCheck(pack,"") || `<div class="empty">${t("packEmpty")}</div>`}</div></section>
+    <section class="list span"><div class="lhead"><span class="tag keep">${t("tagKeep")}</span><h2>${t("keepTitle")}</h2><span class="meta">${keep.length}</span></div>
+      <div class="box-list">${keep.map(([k,v]) => `<div class="item static"><span class="iname">${esc(v.item)}</span><span class="isub">${dot(v.s)}${esc(short(v.s))}</span></div>`).join("") || `<div class="empty">${esc(t("keepEmpty", f))}</div>`}</div></section>
   </div>`;
 }
 
@@ -389,133 +483,142 @@ function renderWeek() {
   const rows = [];
   for (let n=1; n<=Math.max(lastN,1); n++) {
     const l = ls.find(x => x.n === n), tm = TIMES[n];
-    if (!l) { rows.push(`<button class="lesson free" data-act="newlesson" data-w="${d.getDay()}" data-n="${n}"><span class="when"><b>${n}</b><small>${tm[0]}</small></span><span class="what">Free period</span><span></span></button>`); continue; }
+    if (!l) { rows.push(`<button class="lesson free" data-act="newlesson" data-w="${d.getDay()}" data-n="${n}"><span class="when"><b>${n}</b><small>${tm[0]}</small></span><span class="what">${t("free")}</span><span></span></button>`); continue; }
     let cls = "", flag = "";
     if (isToday) {
-      if (nm >= toMin(tm[0]) && nm < toMin(tm[1])) { cls = "now"; flag = "Now"; nextFlag = false; }
-      else if (nextFlag && nm < toMin(tm[0])) { cls = "next"; flag = "Next"; nextFlag = false; }
+      if (nm >= toMin(tm[0]) && nm < toMin(tm[1])) { cls = "now"; flag = t("now"); nextFlag = false; }
+      else if (nextFlag && nm < toMin(tm[0])) { cls = "next"; flag = t("next"); nextFlag = false; }
     }
-    const ts = S.tasks.filter(t => t.date === dIso && (t.lesson === n || (t.lesson == null && t.s === l.s)));
+    const ts = S.tasks.filter(x => x.date === dIso && (x.lesson === n || (x.lesson == null && x.s === l.s)));
     rows.push(`<button class="lesson ${cls}" data-act="lesson" data-date="${dIso}" data-n="${n}">
       <span class="when"><b>${n}</b><small>${tm[0]}–${tm[1]}</small></span>
       <span class="what"><strong>${dot(l.s)}${esc(subj(l.s).name)}${flag?`<span class="flag">${flag}</span>`:""}</strong>
-        <span class="meta">${esc(l.t)}${l.g?` · ${esc(l.g)}`:""}${l.sup?`<span class="sup">+ Wspomaganie</span>`:""}</span>
-        ${ts.length?`<span class="tbadges">${ts.map(t => `<span class="kind k-${t.kind}" style="${t.done?"opacity:.5;text-decoration:line-through":""}">${KINDS[t.kind]}: ${esc(t.text.length>24?t.text.slice(0,23)+"…":t.text)}</span>`).join("")}</span>`:""}</span>
+        <span class="meta">${esc(l.t)}${l.g?` · ${esc(l.g)}`:""}${l.sup?`<span class="sup">+ ${t("support")}</span>`:""}</span>
+        ${ts.length?`<span class="tbadges">${ts.map(x => `<span class="kind k-${x.kind}" style="${x.done?"opacity:.5;text-decoration:line-through":""}">${kindName(x.kind)}: ${esc(x.text.length>24?x.text.slice(0,23)+"…":x.text)}</span>`).join("")}</span>`:""}</span>
       <span class="room">s. ${esc(l.room)}</span></button>`);
   }
-  if (lastN < 10) rows.push(`<button class="lesson free" data-act="newlesson" data-w="${d.getDay()}" data-n="${lastN+1}"><span class="when"><b>+</b></span><span class="what">Add a lesson</span><span></span></button>`);
+  if (lastN < 10) rows.push(`<button class="lesson free" data-act="newlesson" data-w="${d.getDay()}" data-n="${lastN+1}"><span class="when"><b>+</b></span><span class="what">${t("addLesson")}</span><span></span></button>`);
 
   return `
   <div class="weekbar">
-    <button class="arrow" data-act="wmove" data-d="-7" aria-label="Previous week">‹</button>
+    <button class="arrow" data-act="wmove" data-d="-7" aria-label="${t("prevWeek")}">‹</button>
     <h1>${fmt(days[0],{day:"numeric",month:"short"})} – ${fmt(days[4],{day:"numeric",month:"short"})}</h1>
-    <button class="btn" data-act="wnow">This week</button>
-    <button class="arrow" data-act="wmove" data-d="7" aria-label="Next week">›</button>
+    <button class="btn" data-act="wnow">${t("thisWeek")}</button>
+    <button class="arrow" data-act="wmove" data-d="7" aria-label="${t("nextWeek")}">›</button>
   </div>
   <div class="days">${days.map((x,i) => {
-    const c = S.tasks.filter(t => t.date === iso(x) && !t.done).length;
-    return `<button class="day ${iso(x)===iso(today())?"today":""}" aria-pressed="${i===ui.day}" data-act="pickday" data-i="${i}"><b>${fmt(x,{weekday:"short"})}</b><span>${x.getDate()}</span>${c?`<i class="cnt">${c}</i>`:""}</button>`;
+    const c = S.tasks.filter(y => y.date === iso(x) && !y.done).length;
+    return `<button class="day ${iso(x)===iso(today())?"today":""}" aria-pressed="${i===ui.day}" data-act="pickday" data-i="${i}"><b>${cap(fmt(x,{weekday:"short"}))}</b><span>${x.getDate()}</span>${c?`<i class="cnt">${c}</i>`:""}</button>`;
   }).join("")}</div>
-  <p class="meta">Tap a lesson to add homework, a test or something to bring.</p>
+  <p class="meta">${t("tapHint")}</p>
   <div class="lessons">${rows.join("")}</div>`;
 }
 
 function renderTasks() {
-  const open = S.tasks.filter(t => !t.done).sort((a,b) => a.date.localeCompare(b.date) || (a.lesson||0)-(b.lesson||0));
-  const done = S.tasks.filter(t => t.done).sort((a,b) => b.date.localeCompare(a.date));
+  const open = S.tasks.filter(x => !x.done).sort((a,b) => a.date.localeCompare(b.date) || (a.lesson||0)-(b.lesson||0));
+  const done = S.tasks.filter(x => x.done).sort((a,b) => b.date.localeCompare(a.date));
   const groups = {};
-  open.forEach(t => (groups[t.date] = groups[t.date] || []).push(t));
+  open.forEach(x => (groups[x.date] = groups[x.date] || []).push(x));
   const t0 = iso(today()), t1 = iso(addDays(today(),1));
-  const label = k => k < t0 ? "Overdue · " + fmt(parseIso(k),{weekday:"short",day:"numeric",month:"short"})
-    : k === t0 ? "Today" : k === t1 ? "Tomorrow" : fmt(parseIso(k),{weekday:"long",day:"numeric",month:"short"});
+  const label = k => k < t0 ? t("overdueGroup") + " · " + fmt(parseIso(k),{weekday:"short",day:"numeric",month:"short"})
+    : k === t0 ? t("today") : k === t1 ? t("tomorrow") : cap(fmt(parseIso(k),{weekday:"long",day:"numeric",month:"short"}));
   return `
-  <div class="weekbar"><h1>Tasks</h1><button class="btn primary" data-act="newtask">+ New task</button></div>
-  ${open.length ? Object.keys(groups).map(k => `<div class="dategroup ${k<t0?"overdue":""}">${label(k)}</div><div class="box-list">${groups[k].map(t => taskRow(t,false)).join("")}</div>`).join("")
-    : `<div class="card"><h2>No open tasks</h2><p class="meta">Add one from the Timetable by tapping a lesson, or with “New task”. Tasks marked “Bring” show up in your Pack list for that day.</p></div>`}
-  ${done.length ? `<details><summary class="meta" style="cursor:pointer">Done (${done.length})</summary><div class="box-list" style="margin-top:8px">${done.map(t => taskRow(t,true)).join("")}</div>
-    <p style="margin-top:8px"><button class="btn" data-act="cleardone">Delete done tasks</button></p></details>` : ""}`;
+  <div class="weekbar"><h1>${t("tasks")}</h1><button class="btn primary" data-act="newtask">${t("newTask")}</button></div>
+  ${open.length ? Object.keys(groups).map(k => `<div class="dategroup ${k<t0?"overdue":""}">${label(k)}</div><div class="box-list">${groups[k].map(x => taskRow(x,false)).join("")}</div>`).join("")
+    : `<div class="card"><h2>${t("noTasks")}</h2><p class="meta">${t("noTasksHint")}</p></div>`}
+  ${done.length ? `<details><summary class="meta" style="cursor:pointer">${t("doneCount", done.length)}</summary><div class="box-list" style="margin-top:8px">${done.map(x => taskRow(x,true)).join("")}</div>
+    <p style="margin-top:8px"><button class="btn" data-act="cleardone">${t("clearDone")}</button></p></details>` : ""}`;
 }
 
 function renderSetup() {
   return `
   <div class="card">
-    <h2>What each subject needs</h2>
-    <p class="meta">These items decide what goes in and out of your bag. Remove the ones you leave at school, add things like a calculator or a recorder.</p>
+    <h2>${t("langTitle")}</h2>
+    <p class="meta">${t("langHint")}</p>
+    <div class="seg" role="radiogroup" aria-label="${t("langTitle")}">
+      <label><input type="radio" name="lang" value="pl" data-act="setlang" ${lang==="pl"?"checked":""}><span>Polski</span></label>
+      <label><input type="radio" name="lang" value="en" data-act="setlang" ${lang==="en"?"checked":""}><span>English</span></label>
+    </div>
+  </div>
+  <div class="card">
+    <h2>${t("itemsTitle")}</h2>
+    <p class="meta">${t("itemsHint")}</p>
     ${Object.entries(S.subjects).map(([id,s]) => `<div class="subrow">
       <div class="subname">${dot(id)}${esc(s.name)}</div>
-      <div class="chips">${s.items.map((it,i) => `<span class="chip">${esc(it)}<button data-act="delitem" data-s="${id}" data-i="${i}" aria-label="Remove ${esc(it)}">×</button></span>`).join("")}
-        <form class="mini" data-form="additem" data-s="${id}"><input id="ai-${id}" name="item" type="text" placeholder="+ add item" autocomplete="off" enterkeyhint="done"></form></div>
+      <div class="chips">${s.items.map((it,i) => `<span class="chip">${esc(it)}<button data-act="delitem" data-s="${id}" data-i="${i}" aria-label="${t("remove")} ${esc(it)}">×</button></span>`).join("")}
+        <form class="mini" data-form="additem" data-s="${id}"><input id="ai-${id}" name="item" type="text" placeholder="${t("addItem")}" autocomplete="off" enterkeyhint="done"></form></div>
     </div>`).join("")}
-    <form class="inrow" data-form="addsubj" style="margin-top:6px"><input id="newSubj" name="name" type="text" placeholder="New subject name" autocomplete="off"><button class="btn">Add subject</button></form>
+    <form class="inrow" data-form="addsubj" style="margin-top:6px"><input id="newSubj" name="name" type="text" placeholder="${t("newSubjPh")}" autocomplete="off"><button class="btn">${t("addSubj")}</button></form>
   </div>
   <div class="card">
-    <h2>Move to another device</h2>
-    <p class="meta">Your data is saved in this browser only. To get it on your phone or PC, copy the backup here and paste it into the box on the other device.</p>
-    <div class="btnrow"><button class="btn primary" data-act="copy">Copy backup</button></div>
-    <textarea id="backupBox" placeholder="Paste a backup here…" spellcheck="false"></textarea>
-    <div class="btnrow"><button class="btn" data-act="restore">Load pasted backup</button></div>
+    <h2>${t("moveTitle")}</h2>
+    <p class="meta">${t("moveHint")}</p>
+    <div class="btnrow"><button class="btn primary" data-act="copy">${t("copyBackup")}</button></div>
+    <textarea id="backupBox" placeholder="${t("pastePh")}" spellcheck="false"></textarea>
+    <div class="btnrow"><button class="btn" data-act="restore">${t("loadBackup")}</button></div>
   </div>
   <div class="card">
-    <h2>Start over</h2>
-    <p class="meta">Puts back the original 7b timetable and deletes all tasks and edits.</p>
-    <div class="btnrow"><button class="btn danger" data-act="reset" id="resetBtn">Reset everything</button></div>
+    <h2>${t("resetTitle")}</h2>
+    <p class="meta">${t("resetHint")}</p>
+    <div class="btnrow"><button class="btn danger" data-act="reset" id="resetBtn">${t("resetBtn")}</button></div>
   </div>`;
 }
 
 /* ---------- sheets ---------- */
 const subjOptions = sel => Object.entries(S.subjects).map(([id,s]) => `<option value="${id}" ${id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
-const kindSeg = () => `<div class="seg" role="radiogroup" aria-label="Task type">${Object.entries(KINDS).map(([k,v],i) => `<label><input type="radio" name="kind" value="${k}" ${i?"":"checked"}><span>${v}</span></label>`).join("")}</div>`;
+const kindSeg = () => `<div class="seg" role="radiogroup" aria-label="${t("taskType")}">${KINDS.map((k,i) => `<label><input type="radio" name="kind" value="${k}" ${i?"":"checked"}><span>${kindName(k)}</span></label>`).join("")}</div>`;
 
 function lessonForm(w, n, l) {
   return `<form data-form="lesson" data-w="${w}" data-n="${n}">
-    <label class="field"><span>Subject</span><select id="lfS" name="s">${subjOptions(l ? l.s : "pol")}</select></label>
+    <label class="field"><span>${t("subject")}</span><select id="lfS" name="s">${subjOptions(l ? l.s : "pol")}</select></label>
     <div class="grid2">
-      <label class="field"><span>Room</span><input id="lfR" name="room" type="text" value="${esc(l?l.room:"")}"></label>
-      <label class="field"><span>Group</span><input id="lfG" name="g" type="text" value="${esc(l?l.g:"")}"></label>
+      <label class="field"><span>${t("room")}</span><input id="lfR" name="room" type="text" value="${esc(l?l.room:"")}"></label>
+      <label class="field"><span>${t("group")}</span><input id="lfG" name="g" type="text" value="${esc(l?l.g:"")}"></label>
     </div>
-    <label class="field"><span>Teacher</span><input id="lfT" name="t" type="text" value="${esc(l?l.t:"")}"></label>
-    <label class="meta" style="display:flex;gap:8px;align-items:center"><input id="lfSup" name="sup" type="checkbox" ${l&&l.sup?"checked":""}> Wspomaganie (${SUPPORT})</label>
-    <div class="btnrow"><button class="btn primary">${l?"Save every week":"Add to every week"}</button>${l?`<button type="button" class="btn danger" data-act="dellesson" data-w="${w}" data-n="${n}">Remove lesson</button>`:""}</div>
+    <label class="field"><span>${t("teacher")}</span><input id="lfT" name="t" type="text" value="${esc(l?l.t:"")}"></label>
+    <label class="meta" style="display:flex;gap:8px;align-items:center"><input id="lfSup" name="sup" type="checkbox" ${l&&l.sup?"checked":""}> ${t("support")} (${SUPPORT})</label>
+    <div class="btnrow"><button class="btn primary">${l?t("saveWeekly"):t("addWeekly")}</button>${l?`<button type="button" class="btn danger" data-act="dellesson" data-w="${w}" data-n="${n}">${t("removeLesson")}</button>`:""}</div>
   </form>`;
 }
 
 function sheetHTML() {
   const sh = ui.sheet;
+  const closeBtn = `<button class="icon-btn" data-act="close" aria-label="${t("close")}">×</button>`;
   if (sh.type === "lesson") {
     const d = parseIso(sh.date), w = d.getDay(), l = lessonsOn(d).find(x => x.n === sh.n);
     if (!l) return null;
     const s = subj(l.s), tm = TIMES[sh.n];
-    const ts = S.tasks.filter(t => t.date === sh.date && (t.lesson === sh.n || (t.lesson == null && t.s === l.s)));
+    const ts = S.tasks.filter(x => x.date === sh.date && (x.lesson === sh.n || (x.lesson == null && x.s === l.s)));
     return `
     <div class="sh-head"><div><h2>${dot(l.s)}${esc(s.name)}</h2>
-      <p class="meta">${fmt(d,{weekday:"long",day:"numeric",month:"long"})} · lesson ${sh.n} · ${tm[0]}–${tm[1]} · room ${esc(l.room)}</p>
-      <p class="meta">${esc(l.t)}${l.g?` · ${esc(l.g)}`:""}${l.sup?` · Wspomaganie: ${SUPPORT}`:""}</p></div>
-      <button class="icon-btn" data-act="close" aria-label="Close">×</button></div>
-    <h3>Bring to this lesson</h3>
-    <div class="chips">${s.items.map(i => `<span class="chip plain">${esc(i)}</span>`).join("") || `<span class="meta">Nothing. Change this in Setup.</span>`}</div>
-    <h3>Tasks for this lesson</h3>
-    ${ts.length ? `<div class="box-list">${ts.map(t => taskRow(t,false)).join("")}</div>` : `<p class="meta">No tasks yet.</p>`}
+      <p class="meta">${cap(fmt(d,{weekday:"long",day:"numeric",month:"long"}))} · ${t("lesson",sh.n)} · ${tm[0]}–${tm[1]} · ${t("roomShort")} ${esc(l.room)}</p>
+      <p class="meta">${esc(l.t)}${l.g?` · ${esc(l.g)}`:""}${l.sup?` · ${t("support")}: ${SUPPORT}`:""}</p></div>
+      ${closeBtn}</div>
+    <h3>${t("bringTo")}</h3>
+    <div class="chips">${s.items.map(i => `<span class="chip plain">${esc(i)}</span>`).join("") || `<span class="meta">${t("nothingBring")}</span>`}</div>
+    <h3>${t("lessonTasks")}</h3>
+    ${ts.length ? `<div class="box-list">${ts.map(x => taskRow(x,false)).join("")}</div>` : `<p class="meta">${t("noTasksYet")}</p>`}
     <form data-form="addtask" data-date="${sh.date}" data-n="${sh.n}" data-s="${l.s}" style="display:flex;flex-direction:column;gap:10px">
       ${kindSeg()}
-      <div class="inrow"><input id="taskText" name="text" type="text" placeholder="e.g. ex. 4–6, page 52" autocomplete="off" enterkeyhint="done"><button class="btn primary">Add</button></div>
+      <div class="inrow"><input id="taskText" name="text" type="text" placeholder="${t("taskPh")}" autocomplete="off" enterkeyhint="done"><button class="btn primary">${t("add")}</button></div>
     </form>
-    <details class="edit"><summary>Change this lesson in the timetable</summary>${lessonForm(w, sh.n, l)}</details>`;
+    <details class="edit"><summary>${t("editLesson")}</summary>${lessonForm(w, sh.n, l)}</details>`;
   }
   if (sh.type === "newlesson") {
     const tm = TIMES[sh.n];
-    return `<div class="sh-head"><div><h2>Add lesson ${sh.n}</h2><p class="meta">${fmt(addDays(ui.week,(sh.w+6)%7),{weekday:"long"})}s · ${tm[0]}–${tm[1]}</p></div>
-      <button class="icon-btn" data-act="close" aria-label="Close">×</button></div>${lessonForm(sh.w, sh.n, null)}`;
+    return `<div class="sh-head"><div><h2>${t("addLessonN", sh.n)}</h2><p class="meta">${t("everyDay", fmt(addDays(ui.week,(sh.w+6)%7),{weekday:"long"}))} · ${tm[0]}–${tm[1]}</p></div>
+      ${closeBtn}</div>${lessonForm(sh.w, sh.n, null)}`;
   }
   if (sh.type === "newtask") {
     const s0 = sh.s || "pol";
-    return `<div class="sh-head"><div><h2>New task</h2><p class="meta">The date jumps to the next lesson of the subject you pick.</p></div>
-      <button class="icon-btn" data-act="close" aria-label="Close">×</button></div>
+    return `<div class="sh-head"><div><h2>${t("newTaskTitle")}</h2><p class="meta">${t("newTaskHint")}</p></div>
+      ${closeBtn}</div>
       <form data-form="newtask" style="display:flex;flex-direction:column;gap:10px">
-        <label class="field"><span>Subject</span><select id="ntS" name="s">${subjOptions(s0)}</select></label>
+        <label class="field"><span>${t("subject")}</span><select id="ntS" name="s">${subjOptions(s0)}</select></label>
         ${kindSeg()}
-        <label class="field"><span>What</span><input id="ntText" name="text" type="text" placeholder="e.g. Test on chapter 2" autocomplete="off"></label>
-        <label class="field"><span>For</span><input id="ntDate" name="date" type="date" value="${iso(nextLessonDate(s0, today()))}"></label>
-        <div class="btnrow"><button class="btn primary">Add task</button></div>
+        <label class="field"><span>${t("what")}</span><input id="ntText" name="text" type="text" placeholder="${t("whatPh")}" autocomplete="off"></label>
+        <label class="field"><span>${t("forDate")}</span><input id="ntDate" name="date" type="date" value="${iso(nextLessonDate(s0, today()))}"></label>
+        <div class="btnrow"><button class="btn primary">${t("addTask")}</button></div>
       </form>`;
   }
   return null;
@@ -536,13 +639,22 @@ function closeSheet() { ui.sheet = null; $("#scrim").hidden = true; document.bod
 
 /* ---------- render ---------- */
 function render() {
-  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-current", b.dataset.v === ui.view ? "page" : "false"));
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  $("#langBtn b").textContent = t("langCode");
+  document.querySelectorAll(".tab[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === ui.view ? "page" : "false"));
   const v = {pack:renderPack, week:renderWeek, tasks:renderTasks, setup:renderSetup}[ui.view];
   const y = window.scrollY;
   $("#view").innerHTML = v();
   window.scrollTo(0, y);
 }
 const refresh = () => { save(); render(); renderSheet(); };
+function setLang(l) {
+  if (!L[l] || l === lang) return;
+  lang = l;
+  try { localStorage.setItem(LANG_KEY, l); } catch(e) {}
+  render(); renderSheet(); toast(t("tLang"));
+}
 
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
@@ -560,14 +672,15 @@ document.addEventListener("click", e => {
     case "newlesson": openSheet({type:"newlesson", w:+d.w, n:+d.n}); break;
     case "newtask": openSheet({type:"newtask"}); break;
     case "close": closeSheet(); break;
-    case "deltask": S.tasks = S.tasks.filter(t => t.id !== d.id); refresh(); toast("Task deleted"); break;
-    case "cleardone": S.tasks = S.tasks.filter(t => !t.done); refresh(); break;
-    case "dellesson": S.tt[d.w] = (S.tt[d.w]||[]).filter(l => l.n !== +d.n); closeSheet(); refresh(); toast("Lesson removed"); break;
+    case "lang": setLang(lang === "pl" ? "en" : "pl"); break;
+    case "deltask": S.tasks = S.tasks.filter(x => x.id !== d.id); refresh(); toast(t("tDeleted")); break;
+    case "cleardone": S.tasks = S.tasks.filter(x => !x.done); refresh(); break;
+    case "dellesson": S.tt[d.w] = (S.tt[d.w]||[]).filter(l => l.n !== +d.n); closeSheet(); refresh(); toast(t("tLessonRemoved")); break;
     case "delitem": S.subjects[d.s].items.splice(+d.i,1); refresh(); break;
     case "copy": {
       const txt = JSON.stringify(S), box = $("#backupBox");
-      const fallback = () => { box.value = txt; box.focus(); box.select(); toast("Backup is in the box. Copy it from there."); };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("Backup copied"), fallback);
+      const fallback = () => { box.value = txt; box.focus(); box.select(); toast(t("tCopyFallback")); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast(t("tCopied")), fallback);
       else fallback();
       break;
     }
@@ -575,13 +688,13 @@ document.addEventListener("click", e => {
       try {
         const o = JSON.parse($("#backupBox").value.trim());
         if (!o || o.v !== 1 || !o.tt || !o.subjects) throw 0;
-        S = o; refresh(); toast("Backup loaded");
-      } catch(err) { toast("That doesn't look like a Tornister backup. Paste the whole text."); }
+        S = o; refresh(); toast(t("tLoaded"));
+      } catch(err) { toast(t("tBadBackup")); }
       break;
     }
     case "reset":
-      if (a.dataset.armed) { S = fresh(); refresh(); toast("Back to the original timetable"); }
-      else { a.dataset.armed = 1; a.textContent = "Tap again to reset"; setTimeout(() => { if (a.isConnected) { delete a.dataset.armed; a.textContent = "Reset everything"; } }, 4000); }
+      if (a.dataset.armed) { S = fresh(); refresh(); toast(t("tReset")); }
+      else { a.dataset.armed = 1; a.textContent = t("resetAgain"); setTimeout(() => { if (a.isConnected) { delete a.dataset.armed; a.textContent = t("resetBtn"); } }, 4000); }
       break;
   }
 });
@@ -594,8 +707,10 @@ document.addEventListener("change", e => {
     if (a.checked) S.checks[key][a.dataset.k] = 1; else delete S.checks[key][a.dataset.k];
     save(); render();
   } else if (a.dataset.act === "done") {
-    const t = S.tasks.find(x => x.id === a.dataset.id);
-    if (t) { t.done = a.checked; refresh(); }
+    const tk = S.tasks.find(x => x.id === a.dataset.id);
+    if (tk) { tk.done = a.checked; refresh(); }
+  } else if (a.dataset.act === "setlang") {
+    setLang(a.value);
   } else if (a.id === "ntS") {
     $("#ntDate").value = iso(nextLessonDate(a.value, today()));
   }
@@ -607,23 +722,23 @@ document.addEventListener("submit", e => {
   const fd = new FormData(f);
   if (d.form === "addtask") {
     const text = String(fd.get("text")||"").trim();
-    if (!text) return toast("Write what the task is first");
+    if (!text) return toast(t("tNeedText"));
     S.tasks.push({id:uid(), s:d.s, date:d.date, lesson:+d.n, kind:fd.get("kind"), text, done:false});
-    refresh(); toast(fd.get("kind")==="bring" ? "Added. It's on your Pack list for that day" : "Task added");
+    refresh(); toast(fd.get("kind")==="bring" ? t("tBringAdded") : t("tTaskAdded"));
     const inp = $("#taskText"); if (inp) inp.focus();
   } else if (d.form === "newtask") {
     const text = String(fd.get("text")||"").trim(), date = fd.get("date"), s = fd.get("s");
-    if (!text) return toast("Write what the task is first");
-    if (!date) return toast("Pick a date");
+    if (!text) return toast(t("tNeedText"));
+    if (!date) return toast(t("tNeedDate"));
     const l = lessonsOn(parseIso(date)).find(x => x.s === s);
     S.tasks.push({id:uid(), s, date, lesson:l ? l.n : null, kind:fd.get("kind"), text, done:false});
-    closeSheet(); refresh(); toast("Task added");
+    closeSheet(); refresh(); toast(t("tTaskAdded"));
   } else if (d.form === "lesson") {
     const w = d.w, n = +d.n;
     const l = {n, s:fd.get("s"), room:String(fd.get("room")||"").trim(), t:String(fd.get("t")||"").trim(), g:String(fd.get("g")||"").trim(), sup:!!fd.get("sup")};
     S.tt[w] = (S.tt[w]||[]).filter(x => x.n !== n).concat(l);
     if (ui.sheet && ui.sheet.type === "newlesson") closeSheet();
-    refresh(); toast("Timetable updated");
+    refresh(); toast(t("tTTUpdated"));
   } else if (d.form === "additem") {
     const v = String(fd.get("item")||"").trim();
     if (!v) return;
@@ -634,7 +749,7 @@ document.addEventListener("submit", e => {
     const name = String(fd.get("name")||"").trim();
     if (!name) return;
     S.subjects["x"+uid()] = {name, hue:Math.floor(Math.random()*360), items:["Zeszyt"]};
-    refresh(); toast(name + " added. Put it in the timetable from a free period.");
+    refresh(); toast(t("tSubjAdded", name));
   }
 });
 
