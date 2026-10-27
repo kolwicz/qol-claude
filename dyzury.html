@@ -108,8 +108,12 @@ textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius
 /* month + roster table */
 #months{display:flex;flex-direction:column;gap:30px}
 .month{display:flex;flex-direction:column;gap:10px;min-width:0}
-.mhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
+.mhead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+.mtitle{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;min-width:0}
 .mhead h2{font-size:1.6rem;font-weight:800}
+.teacher{margin-left:auto;width:min(100%,280px);min-height:54px;border:1.5px dashed var(--line);border-radius:10px;padding:6px 10px;display:flex;flex-direction:column;justify-content:space-between;background:var(--card)}
+.teacher span{font-family:var(--display);font-weight:700;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.teacher i{font-size:.8rem;color:var(--muted)}
 .tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
 table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums}
 .roster col.dcol{width:92px}
@@ -141,9 +145,10 @@ table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fi
 .roster tr.flash td.c button{animation:pop .45s ease-out}
 @keyframes pop{from{transform:scale(.82);opacity:.35}}
 .sum{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-.sum li{display:inline-flex;align-items:baseline;gap:7px;padding:5px 12px;border-radius:999px;background:var(--ps);color:var(--pc);font-family:var(--display);font-weight:700;font-size:.9rem}
+.sum li{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 5px;border-radius:999px;background:var(--ps);color:var(--pc);font-family:var(--display);font-weight:700;font-size:.9rem}
 .sum li span{font-weight:500;font-size:.8rem}
 .sum li em{font-style:normal;font-weight:500;color:var(--ink)}
+.sum li .code{background:var(--pc);color:var(--card);border-radius:999px;padding:1px 8px;font-size:.8rem;font-weight:800}
 
 @media (max-width:719px){
   .roster col.dcol{width:70px}
@@ -170,43 +175,52 @@ table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fi
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 @media print{
+  /* wall copy: big pair codes and dates, legend on top, a box for the teacher to write his name */
   @page{size:A4 landscape;margin:8mm}
   :root:not([data-p]),:root[data-theme]{
-    --paper:#ffffff; --grid:#ffffff; --card:#ffffff; --ink:#18212f; --muted:#5d6879; --line:#c9d1de; --off:#edf0f5;
-    --pen:#2346c4; --pen-soft:#e5ebff; --long:#9a5d08; --long-soft:#fcefd6;
-    --p0:#2346c4; --p0-soft:#e3e9ff; --p1:#1b7a41; --p1-soft:#ddf2e4; --p2:#97307f; --p2-soft:#f6e3f1; color-scheme:light }
+    --paper:#ffffff; --grid:#ffffff; --card:#ffffff; --ink:#111823; --muted:#4a5466; --line:#b9c3d3; --off:#e6eaf1;
+    --pen:#2346c4; --pen-soft:#e5ebff; --long:#8a5200; --long-soft:#fbe3b8;
+    --p0:#1c3aa6; --p0-soft:#cdd9ff; --p1:#146b37; --p1-soft:#c4ebd1; --p2:#842a70; --p2-soft:#f1cfe8; color-scheme:light }
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body{background:var(--card);padding:0;font-size:10pt}
-  .top,.card,.toast,.dice,.roster tr.wk{display:none!important}
+  body{background:var(--card);padding:0;font-size:11pt}
+  .top,.card,.toast,.dice,.roster tr.wk,.roster tr.offcont,.teacher i,.sum li em{display:none!important}
   .wrap,#months{max-width:none;gap:0}
-  .month{gap:2.5mm;break-inside:avoid}
+  .month{gap:3mm;break-inside:avoid}
   .month + .month{break-before:page}
   .print-only{display:inline}
-  .mhead h2{font-size:15pt}
-  .mhead .meta{font-size:8.5pt}
-  .tablewrap{border:0;border-radius:0;overflow:visible;background:none}
+  .mhead{flex-wrap:nowrap;align-items:stretch;gap:6mm}
+  .mtitle{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1.2mm}
+  .mhead h2{font-size:22pt;line-height:1}
+  .mhead .meta{font-size:9pt}
+  .teacher{width:100mm;min-height:15mm;border:1.2pt solid var(--ink);border-radius:2mm;padding:1.2mm 2.5mm;justify-content:flex-start}
+  .teacher span{font-size:7.5pt;color:var(--ink)}
+  .sum{order:1;gap:3mm}
+  .sum li{font-size:12.5pt;padding:1.2mm 4mm 1.2mm 1.4mm;gap:2mm}
+  .sum li .code{font-size:12.5pt;padding:.4mm 2.2mm}
+  .sum li span{font-size:9pt}
+  .tablewrap{order:2;border:0;border-radius:0;overflow:visible;background:none}
   table.roster{min-width:0}
-  .roster col.dcol{width:19mm}
-  .roster thead th{font-size:8pt;padding:1mm .3mm 1.2mm;border-bottom:1pt solid var(--ink)}
-  .roster thead th .to{display:inline!important}
-  .roster thead th small{font-size:5.5pt;margin-top:.6mm}
-  .roster thead th.dcol{font-size:6pt;padding-left:1mm}
+  .roster col.dcol{width:21mm}
+  .roster thead th{font-size:11pt;padding:1mm 0 1.4mm;border-bottom:1.4pt solid var(--ink)}
+  .roster thead th .to{display:inline!important;font-size:7.5pt}
+  .roster thead th small{display:block!important;font-size:6pt;margin-top:.6mm}
+  .roster thead th.dcol{font-size:6.5pt;padding-left:1mm}
   .roster tbody th.dcol{padding:0 .5mm 0 0}
-  .date{padding:0 1mm;gap:1.2mm}
-  .date b{font-size:9.5pt}
-  .date span{font-size:7.5pt}
-  .roster td.c{padding:.45mm}
-  .roster td.c button{min-height:0;padding:1.15mm .3mm;font-size:7.4pt;border-radius:1mm}
-  .roster td.c .nm{display:inline!important}
-  .roster td.c .ab{display:none!important}
-  .roster td.span button{font-size:8.5pt}
-  .roster td.span small{font-size:7pt}
-  .roster tr.wstart > *{border-top:.8pt solid var(--ink)}
-  .roster tr.off td{padding:1mm 2mm;font-size:7.5pt}
+  .date{padding:0 1mm;gap:1.4mm}
+  .date b{font-size:13pt}
+  .date span{font-size:9pt}
+  .roster td.c{padding:.4mm}
+  .roster td.long{padding:.4mm .9mm}
+  .roster td.c button{min-height:0;padding:.45mm 0;font-size:12.5pt;line-height:1.05;border-radius:1.2mm}
+  .roster td.c .nm{display:none!important}
+  .roster td.c .ab{display:inline!important}
+  .roster td.span button{font-size:13pt}
+  .roster td.span small{font-size:9pt}
+  .roster tr.wstart > *{border-top:1.2pt solid var(--ink)}
+  .roster tr.off td{padding:.8mm 2mm;font-size:9pt}
+  .roster tr.off .date b{font-size:10pt}
   .roster tr.today .date{background:none;color:var(--ink)}
-  .sum{gap:2mm;margin-top:1mm}
-  .sum li{font-size:8pt;padding:.8mm 3mm}
-  .sum li span{font-size:7pt}
+  .roster tr.today .date span{color:var(--muted)}
 }
 </style>
 
@@ -426,6 +440,13 @@ function monthHTML(mo, act) {
   }
   const N = act.length, today = keyOf(new Date()), hasLong = act.some(b => b.long);
   const cnt = PAIRS.map(() => ({n: 0, long: 0}));
+  const runOf = {};
+  let run = null;
+  mdays.forEach((d, i) => {
+    if (d.off && run && run.reason === d.off && run.days[run.days.length - 1] === mdays[i - 1]) run.days.push(d);
+    else run = d.off ? {reason: d.off, days: [d]} : null;
+    if (run) runOf[d.k] = run;
+  });
   let rows = "";
   for (const w of weeks) {
     const roll = w.days.some(d => !d.off) ? diceBtn("rollWeek", w.mon, `Losuj tydzień ${weekRange(w.mon)}`) : "";
@@ -433,7 +454,12 @@ function monthHTML(mo, act) {
     w.days.forEach((d, i) => {
       const cls = [i === 0 ? "wstart" : "", d.k === today ? "today" : "", flash.has(d.k) ? "flash" : "", d.off ? "off" : ""].filter(Boolean).join(" ");
       const date = `<button class="date" data-act="free" data-k="${d.k}" aria-label="${dayLabel(d)}: ${d.off ? "przywróć lekcje" : "oznacz jako dzień wolny"}"><b>${d.date.getDate()}</b><span>${DOW[d.dow]}</span></button>`;
-      if (d.off) { rows += `<tr class="${cls}"><th scope="row" class="dcol">${date}</th><td colspan="${N}">${d.off}</td></tr>`; return; }
+      if (d.off) {
+        const r = runOf[d.k], first = r.days[0] === d, last = r.days[r.days.length - 1].date;
+        const range = first && r.days.length > 1 ? `<span class="print-only">${d.date.getDate()}–${last.getDate()} ${GEN[last.getMonth()]}: </span>` : "";
+        rows += `<tr class="${cls}${first ? "" : " offcont"}"><th scope="row" class="dcol">${date}</th><td colspan="${N}">${range}${d.off}</td></tr>`;
+        return;
+      }
       const sl = slots(d, act);
       let cells;
       if (S.mode === "brk") {
@@ -451,9 +477,9 @@ function monthHTML(mo, act) {
   const nSchool = mdays.filter(d => !d.off).length;
   const head = `<tr><th class="dcol" scope="col">Dzień</th>${act.map(b => `<th scope="col"${b.long ? ' class="long"' : ""}><b>${b.a}</b><span class="to">–${b.b}</span><small>${b.long ? "długa" : b.after}</small></th>`).join("")}</tr>`;
   const cols = `<col class="dcol">${act.map(() => "<col>").join("")}`;
-  const sum = PAIRS.map((p, i) => `<li class="p${i}">${p.names} <span>kl. ${p.cls}</span> <em>${sumText(cnt[i], hasLong)}</em></li>`).join("");
+  const sum = PAIRS.map((p, i) => `<li class="p${i}"><b class="code">${p.short}</b>${p.names} <span>kl. ${p.cls}</span> <em>${sumText(cnt[i], hasLong)}</em></li>`).join("");
   return `<section class="month" aria-label="${mo.name} ${mo.y}">
-    <div class="mhead"><h2><span class="print-only">Dyżury na przerwach · </span>${mo.name} ${mo.y}</h2><p class="meta">${nSchool} ${plural(nSchool, "dzień", "dni", "dni")} nauki · para zmienia się ${MODES[S.mode]}</p></div>
+    <div class="mhead"><div class="mtitle"><h2><span class="print-only">Dyżury na przerwach · </span>${mo.name} ${mo.y}</h2><p class="meta">${nSchool} ${plural(nSchool, "dzień", "dni", "dni")} nauki · para zmienia się ${MODES[S.mode]}</p></div><div class="teacher"><span>Nauczyciel</span><i>miejsce na imię i nazwisko</i></div></div>
     <div class="tablewrap"><table class="roster"><colgroup>${cols}</colgroup><thead>${head}</thead><tbody>${rows}</tbody></table></div>
     <ul class="sum" aria-label="Podsumowanie">${sum}</ul>
   </section>`;
@@ -613,7 +639,7 @@ function copyText(text, okMsg) {
 function tsv() {
   const act = activeBreaks(), out = [];
   for (const mo of viewMonths()) {
-    out.push(`Dyżury na przerwach – ${mo.name} ${mo.y}`);
+    out.push(`Dyżury na przerwach – ${mo.name} ${mo.y}`, "Nauczyciel:\t");
     out.push(["Dzień", ...act.map(b => `${b.a}–${b.b}${b.long ? " (długa)" : ""}`)].join("\t"));
     for (const d of CAL.days.filter(x => x.month === mo.key)) {
       const lab = `${DOW[d.dow]} ${d.date.getDate()}.${pad(d.date.getMonth() + 1)}`;
