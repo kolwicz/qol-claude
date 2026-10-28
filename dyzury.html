@@ -170,6 +170,12 @@ table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fi
   .roster td.span .nm,.roster td.span button{font-size:.9rem}
 }
 
+.shot{position:fixed;inset:0;z-index:25;background:rgb(10 14 22 / .6);overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) 16px max(16px, env(safe-area-inset-left,0px))}
+.shotin{max-width:1100px;margin:0 auto;background:var(--card);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.shotin .btnrow{justify-content:space-between;flex-wrap:nowrap}
+.shotin b{font-size:.9rem}
+#shotImgs{display:flex;flex-direction:column;gap:12px}
+#shotImgs img{width:100%;border:1px solid var(--line);border-radius:6px;-webkit-touch-callout:default}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);padding:9px 10px 9px 16px;border-radius:12px;z-index:30;font-weight:700;font-size:.9rem;max-width:calc(100% - 32px);display:flex;align-items:center;gap:12px}
 .toast button{border:0;background:var(--card);color:var(--ink);border-radius:8px;padding:5px 11px;font-family:var(--display);font-weight:700;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -265,11 +271,12 @@ table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fi
       <div class="btnrow">
         <button class="btn primary" id="rollAll"><svg class="die" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg><span id="rollAllTxt">Losuj miesiąc</span></button>
         <button class="btn" id="resetBtn">Stała kolejka</button>
+        <button class="btn" id="imgBtn">Obrazek A4 do druku</button>
         <button class="btn" id="printBtn">Drukuj</button>
         <button class="btn" id="copyBtn">Kopiuj do arkusza</button>
       </div>
       <p class="meta hint">Kostka przy tygodniu albo dniu losuje tylko ten tydzień lub dzień. Kliknij parę w tabeli, żeby zamienić ją na następną. Kliknij datę, żeby oznaczyć dzień wolny albo przywrócić lekcje.</p>
-      <p class="meta hint" id="printHint" hidden>W tym podglądzie drukowanie nie działa. Otwórz plik dyzury.html w przeglądarce (Chrome, Safari) i kliknij Drukuj: każdy miesiąc mieści się na jednej kartce A4 w poziomie. Możesz też skopiować tabelę do Arkuszy Google albo Excela i wydrukować stamtąd.</p>
+      <p class="meta hint" id="printHint" hidden>Tutaj przycisk Drukuj nie działa. Kliknij „Obrazek A4 do druku”: zrobi kartkę z tym, co właśnie wylosowałeś. Przytrzymaj obrazek, zapisz go albo udostępnij i wybierz Drukuj (A4, poziomo).</p>
       <details class="move" id="move">
         <summary>Przenieś grafik na inne urządzenie</summary>
         <div>
@@ -284,6 +291,7 @@ table.roster{width:100%;min-width:340px;border-collapse:collapse;table-layout:fi
 
   <div id="months"></div>
 </div>
+<div class="shot" id="shot" hidden><div class="shotin"><div class="btnrow"><b>Przytrzymaj obrazek (na komputerze: prawy przycisk) → Zapisz albo Udostępnij → Drukuj. Papier A4, poziomo.</b><button class="btn" id="shotClose">Zamknij</button></div><div id="shotImgs"></div></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
@@ -661,6 +669,101 @@ $("#codeLoad").addEventListener("click", () => {
   $("#codeBox").value = "";
   commit("Wczytano grafik");
 });
+
+/* ---------- A4 picture (printing is blocked inside the Claude app) ---------- */
+function drawMonth(mo) {
+  const W = 2339, H = 1654, k = W / 297, pt = v => v * k * 0.3528, M = 8 * k;
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  const DF = 'Gabarito, system-ui, sans-serif', BF = '"Atkinson Hyperlegible", system-ui, sans-serif';
+  const COL = [["#1c3aa6", "#cdd9ff"], ["#146b37", "#c4ebd1"], ["#842a70", "#f1cfe8"]];
+  const INK = "#111823", MUT = "#4a5466", LONG = "#8a5200", LONGS = "#fbe3b8";
+  const box = (X, Y, w, h, r, fill) => { x.fillStyle = fill; x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); x.fill(); };
+  const txt = (t, X, Y, font, col, al = "left") => { x.font = font; x.fillStyle = col; x.textAlign = al; x.fillText(t, X, Y); return x.measureText(t).width; };
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.textBaseline = "alphabetic";
+  const act = activeBreaks(), N = act.length;
+  const mdays = CAL.days.filter(d => d.month === mo.key);
+  const nSchool = mdays.filter(d => !d.off).length;
+  // header + teacher box
+  txt(`Dyżury na przerwach · ${mo.name} ${mo.y}`, M, M + pt(20), `800 ${pt(22)}px ${DF}`, INK);
+  txt(`${nSchool} ${plural(nSchool, "dzień", "dni", "dni")} nauki · para zmienia się ${MODES[S.mode]}`, M, M + pt(20) + 5.5 * k, `400 ${pt(9)}px ${BF}`, MUT);
+  const tw = 100 * k, th = 15 * k, tx = W - M - tw;
+  x.strokeStyle = INK; x.lineWidth = pt(1.2); x.beginPath(); x.roundRect ? x.roundRect(tx, M, tw, th, 2 * k) : x.rect(tx, M, tw, th); x.stroke();
+  txt("NAUCZYCIEL", tx + 2.5 * k, M + 4 * k, `700 ${pt(7.5)}px ${DF}`, INK);
+  // legend
+  let lx = M; const ly = M + th + 3 * k, lh = 8.5 * k;
+  PAIRS.forEach((p, i) => {
+    x.font = `700 ${pt(12.5)}px ${DF}`; const cw = x.measureText(p.short).width + 4.4 * k, nw = x.measureText(p.names).width;
+    x.font = `500 ${pt(9)}px ${DF}`; const kw = x.measureText(`kl. ${p.cls}`).width;
+    const w = 1.4 * k + cw + 2 * k + nw + 2 * k + kw + 4 * k;
+    box(lx, ly, w, lh, lh / 2, COL[i][1]);
+    box(lx + 1.2 * k, ly + 1.2 * k, cw, lh - 2.4 * k, (lh - 2.4 * k) / 2, COL[i][0]);
+    const by = ly + lh / 2 + pt(4.4);
+    txt(p.short, lx + 1.2 * k + cw / 2, by, `700 ${pt(12.5)}px ${DF}`, "#fff", "center");
+    txt(p.names, lx + 1.4 * k + cw + 2 * k, by, `700 ${pt(12.5)}px ${DF}`, COL[i][0]);
+    txt(`kl. ${p.cls}`, lx + 1.4 * k + cw + 4 * k + nw, by, `500 ${pt(9)}px ${DF}`, COL[i][0]);
+    lx += w + 3 * k;
+  });
+  // rows: merge runs of days off
+  const rows = [];
+  mdays.forEach((d, i) => {
+    const prev = rows[rows.length - 1];
+    if (d.off && prev && prev.off === d.off && prev.last === mdays[i - 1]) { prev.last = d; return; }
+    rows.push({d, off: d.off, last: d});
+  });
+  const top = ly + lh + 3 * k, dc = 21 * k, cw = (W - 2 * M - dc) / N, hh = 10 * k;
+  const rh = Math.min(7.2 * k, (H - M - top - hh) / rows.length);
+  act.forEach((b, j) => {
+    const cx = M + dc + j * cw;
+    if (b.long) box(cx, top, cw, hh + rh * rows.length, 0, LONGS);
+    x.font = `700 ${pt(11)}px ${DF}`; const aw = x.measureText(b.a).width; x.font = `500 ${pt(7.5)}px ${DF}`; const bw = x.measureText("–" + b.b).width;
+    const sx = cx + (cw - aw - bw) / 2;
+    txt(b.a, sx, top + 5 * k, `700 ${pt(11)}px ${DF}`, b.long ? LONG : INK);
+    txt("–" + b.b, sx + aw, top + 5 * k, `500 ${pt(7.5)}px ${DF}`, b.long ? LONG : MUT);
+    txt((b.long ? "długa" : b.after).toUpperCase(), cx + cw / 2, top + 8.3 * k, `700 ${pt(6)}px ${DF}`, b.long ? LONG : MUT, "center");
+  });
+  txt("DZIEŃ", M + k, top + 8.3 * k, `700 ${pt(6.5)}px ${DF}`, MUT);
+  x.fillStyle = INK; x.fillRect(M, top + hh - pt(1.4), W - 2 * M, pt(1.4));
+  let y = top + hh, lastMon = null;
+  for (const r of rows) {
+    const d = r.d;
+    if (lastMon && d.mon !== lastMon) { x.fillStyle = INK; x.fillRect(M, y, W - 2 * M, pt(1.2)); }
+    lastMon = r.last.mon;
+    const base = y + rh / 2 + pt(4.4);
+    const nw = txt(String(d.date.getDate()), M + 7 * k, base, `700 ${pt(r.off ? 10 : 13)}px ${DF}`, r.off ? MUT : INK, "right");
+    txt(DOW[d.dow], M + 8.4 * k, base, `400 ${pt(9)}px ${BF}`, MUT);
+    if (r.off) {
+      box(M + dc, y + 0.4 * k, W - 2 * M - dc, rh - 0.8 * k, 1.2 * k, "#e6eaf1");
+      const lab = r.last !== d ? `${d.date.getDate()}–${r.last.date.getDate()} ${GEN[r.last.date.getMonth()]}: ${r.off}` : r.off;
+      txt(lab, M + dc + 2 * k, base, `italic 400 ${pt(9)}px ${BF}`, MUT);
+    } else {
+      slots(d, act).forEach((p, j) => {
+        const cx = M + dc + j * cw, pad = act[j].long ? 0.9 * k : 0.4 * k;
+        if (S.mode === "brk" || j === 0) {
+          const w = S.mode === "brk" ? cw - 2 * pad : cw * N - 0.8 * k;
+          box(cx + pad, y + 0.4 * k, w, rh - 0.8 * k, 1.2 * k, COL[p][1]);
+          const t = S.mode === "brk" ? p === undefined ? "" : PAIRS[p].short : `${PAIRS[p].names} · kl. ${PAIRS[p].cls} · wszystkie przerwy`;
+          txt(t, cx + pad + w / 2, base, `700 ${pt(S.mode === "brk" ? 12.5 : 13)}px ${DF}`, COL[p][0], "center");
+        }
+      });
+    }
+    y += rh;
+  }
+  return c;
+}
+$("#imgBtn").addEventListener("click", async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  const wrap = $("#shotImgs");
+  wrap.textContent = "";
+  for (const mo of viewMonths()) {
+    const img = new Image();
+    img.src = drawMonth(mo).toDataURL("image/png");
+    img.alt = `Dyżury na przerwach, ${mo.name} ${mo.y}`;
+    wrap.append(img);
+  }
+  $("#shot").hidden = false;
+});
+$("#shotClose").addEventListener("click", () => { $("#shot").hidden = true; });
 
 render();
 })();
